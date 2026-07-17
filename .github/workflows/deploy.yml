@@ -84,10 +84,17 @@ jobs:
 
       # ── 5. Build & Deploy ─────────────────────────────────────────────────
       - name: Build & Deploy to CloudHub 2.0
+        env:
+          ANYPOINT_CLIENT_ID: ${{ secrets.ANYPOINT_CLIENT_ID }}
+          ANYPOINT_CLIENT_SECRET: ${{ secrets.ANYPOINT_CLIENT_SECRET }}
         run: |
           mvn clean deploy -DskipTests -B \
-            -Danypoint.client_id="${{ secrets.ANYPOINT_CLIENT_ID }}" \
-            -Danypoint.client_secret="${{ secrets.ANYPOINT_CLIENT_SECRET }}" \
+            -Dmule.maven.plugin.skipValidation=true \
+            -DSKIP_AST=true \
+            -DSKIP_AST_VALIDATION=true \
+            -DlightweightPackage=true \
+            -Danypoint.client_id="${ANYPOINT_CLIENT_ID}" \
+            -Danypoint.client_secret="${ANYPOINT_CLIENT_SECRET}" \
             -Dcloudhub.environment="${{ vars.CLOUDHUB_ENV || 'Sandbox' }}" \
             -Dcloudhub.businessGroup="${{ vars.CLOUDHUB_BUSINESS_GROUP || '' }}" \
             -Dcloudhub.target="${{ vars.CLOUDHUB_TARGET || 'Sandbox' }}"

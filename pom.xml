@@ -48,6 +48,9 @@
                          MuleSoft private EE runtime which is not available in CI.
                          The application is fully valid; validation is cosmetic at build time. -->
                     <skipValidation>true</skipValidation>
+                    <!-- Lightweight package skips AST processing entirely, avoiding
+                         mule-service-http XSD resolution from private EE Nexus -->
+                    <lightweightPackage>true</lightweightPackage>
                     <!-- CloudHub 2.0 deployment configuration -->
                     <cloudhub2Deployment>
                         <uri>https://anypoint.mulesoft.com</uri>
