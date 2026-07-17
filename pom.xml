@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <app.runtime>4.6.0</app.runtime>
-        <mule.maven.plugin.version>4.1.0</mule.maven.plugin.version>
+        <mule.maven.plugin.version>3.9.4</mule.maven.plugin.version>
 
         <!-- CloudHub 2.0 deployment — override via -D flags or CI secrets -->
         <cloudhub.environment>Sandbox</cloudhub.environment>
@@ -44,13 +44,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <classifier>mule-application</classifier>
-                    <!-- Skip XML schema validation — schema resolution requires
-                         MuleSoft private EE runtime which is not available in CI.
-                         The application is fully valid; validation is cosmetic at build time. -->
-                    <skipValidation>true</skipValidation>
-                    <!-- Lightweight package skips AST processing entirely, avoiding
-                         mule-service-http XSD resolution from private EE Nexus -->
-                    <lightweightPackage>true</lightweightPackage>
                     <!-- CloudHub 2.0 deployment configuration -->
                     <cloudhub2Deployment>
                         <uri>https://anypoint.mulesoft.com</uri>
