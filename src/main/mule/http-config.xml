@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xsi:schemaLocation="
+          http://www.mulesoft.org/schema/mule/core
+          https://www.mulesoft.org/schema/mule/core/current/mule.xsd
+          http://www.mulesoft.org/schema/mule/http
+          https://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <!-- =========================================================== -->
+    <!--  HTTP Listener Configuration (Inbound)                      -->
+    <!--  Listens on localhost:8081                                   -->
+    <!-- =========================================================== -->
+    <http:listener-config name="HTTP_Listener_Config"
+                          doc:name="HTTP Listener Config">
+        <http:listener-connection
+            host="${http.listener.host}"
+            port="${http.listener.port}" />
+    </http:listener-config>
+
+    <!-- =========================================================== -->
+    <!--  HTTP Request Configuration (Outbound)                      -->
+    <!--  Connects to dummyjson.com                                   -->
+    <!-- =========================================================== -->
+    <http:request-config name="DummyJSON_Request_Config"
+                         doc:name="DummyJSON HTTP Request Config">
+        <http:request-connection
+            protocol="HTTPS"
+            host="${dummyjson.host}"
+            port="${dummyjson.port}" />
+    </http:request-config>
+
+</mule>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration status="WARN" monitorInterval="60">
+
+    <Appenders>
+        <!-- Console Appender for Anypoint Studio / local runs -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%-5p %d [%t] [event: %X{correlationId}] %c: %m%n"/>
+        </Console>
+
+        <!-- Rolling File Appender -->
+        <RollingFile name="RollingFile"
+                     fileName="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}dummy-products-api.log"
+                     filePattern="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}dummy-products-api-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%-5p %d [%t] [event: %X{correlationId}] %c: %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Application loggers -->
+        <AsyncLogger name="com.mycompany" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </AsyncLogger>
+
+        <!-- Mule Runtime loggers -->
+        <AsyncLogger name="org.mule" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </AsyncLogger>
+
+        <!-- HTTP connector request/response logging -->
+        <AsyncLogger name="org.mule.service.http" level="WARN" additivity="false">
+            <AppenderRef ref="Console"/>
+        </AsyncLogger>
+
+        <AsyncLogger name="com.mulesoft" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </AsyncLogger>
+
+        <!-- Root logger -->
+        <AsyncRoot level="WARN">
+            <AppenderRef ref="Console"/>
+        </AsyncRoot>
+    </Loggers>
+
+</Configuration>

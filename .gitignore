@@ -1,0 +1,25 @@
+# MuleSoft / Anypoint Studio
+.mule/
+.studio/
+target/
+*.jar
+*.zip
+
+# Maven
+.m2/
+
+# IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+*.launch
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment secrets — never commit
+src/main/resources/config-prod.properties
+src/main/resources/config-staging.properties

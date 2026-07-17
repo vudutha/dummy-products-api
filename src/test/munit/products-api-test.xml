@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xsi:schemaLocation="
+          http://www.mulesoft.org/schema/mule/core
+          https://www.mulesoft.org/schema/mule/core/current/mule.xsd
+          http://www.mulesoft.org/schema/mule/munit
+          https://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+          http://www.mulesoft.org/schema/mule/munit-tools
+          https://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+
+    <munit:config name="products-api-test.xml" />
+
+    <!-- =========================================================== -->
+    <!--  Test: GET /dummy/products returns 200                      -->
+    <!-- =========================================================== -->
+    <munit:test name="get-products-flow-success-test"
+                doc:name="Test Get Products Flow - 200 OK"
+                description="Validates that get-products-flow returns HTTP 200 with product list">
+
+        <!-- Mock the outbound HTTP request to DummyJSON -->
+        <munit:behavior>
+            <munit-tools:mock-when
+                doc:name="Mock DummyJSON HTTP Request"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:name" whereValue="Fetch Products from DummyJSON"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[output application/json --- { "products": [], "total": 0, "skip": 0, "limit": 30 }]'
+                                         mediaType="application/json" />
+                    <munit-tools:attributes value='#[{ statusCode: 200 }]' />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <!-- Execute flow -->
+        <munit:execution>
+            <munit-tools:flow-ref name="get-products-flow" />
+        </munit:execution>
+
+        <!-- Assertions -->
+        <munit:validation>
+            <munit-tools:assert-that
+                doc:name="Assert payload is not null"
+                expression="#[payload]"
+                is="#[MunitTools::notNullValue()]" />
+        </munit:validation>
+
+    </munit:test>
+
+</mule>

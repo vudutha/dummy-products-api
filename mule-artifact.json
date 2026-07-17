@@ -1,0 +1,18 @@
+{
+  "minMuleVersion": "4.6.0",
+  "name": "dummy-products-api",
+  "configs": [
+    "http-config.xml",
+    "products-api.xml"
+  ],
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedResources": []
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

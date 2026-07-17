@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xsi:schemaLocation="
+          http://www.mulesoft.org/schema/mule/core
+          https://www.mulesoft.org/schema/mule/core/current/mule.xsd
+          http://www.mulesoft.org/schema/mule/http
+          https://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+          http://www.mulesoft.org/schema/mule/ee/core
+          https://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- =========================================================== -->
+    <!--  Properties Placeholder                                     -->
+    <!-- =========================================================== -->
+    <configuration-properties
+        doc:name="Configuration Properties"
+        file="config-${mule.env}.properties" />
+
+    <!-- =========================================================== -->
+    <!--  GET /dummy/products — Fetch all products                   -->
+    <!-- =========================================================== -->
+    <flow name="get-products-flow" doc:name="Get Products Flow">
+
+        <!-- 1. HTTP Listener -->
+        <http:listener
+            doc:name="GET /dummy/products"
+            config-ref="HTTP_Listener_Config"
+            path="/dummy/products"
+            allowedMethods="GET">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+
+        <!-- 2. Log incoming request -->
+        <logger
+            doc:name="Log Incoming Request"
+            level="INFO"
+            message="#['[GET /dummy/products] Incoming request from ' ++ (attributes.remoteAddress default 'unknown')]" />
+
+        <!-- 3. Call dummyjson.com/products -->
+        <http:request
+            doc:name="Fetch Products from DummyJSON"
+            config-ref="DummyJSON_Request_Config"
+            method="GET"
+            path="/products">
+            <http:headers>
+                <![CDATA[#[output application/java
+                ---
+                {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                }]]]>
+            </http:headers>
+        </http:request>
+
+        <!-- 4. Set success response headers -->
+        <set-variable
+            doc:name="Set HTTP Status 200"
+            variableName="httpStatus"
+            value="200" />
+
+        <set-variable
+            doc:name="Set Outbound Headers"
+            variableName="outboundHeaders"
+            value="#[{'Content-Type': 'application/json', 'X-Powered-By': 'MuleSoft'}]" />
+
+        <!-- 5. Transform response -->
+        <ee:transform doc:name="Transform Response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <!-- 6. Log success -->
+        <logger
+            doc:name="Log Success Response"
+            level="INFO"
+            message="#['[GET /dummy/products] Successfully fetched products. Total: ' ++ (payload.total default 0 as String)]" />
+
+        <!-- Error Handler -->
+        <error-handler>
+            <on-error-propagate
+                doc:name="On Error Propagate"
+                type="HTTP:CONNECTIVITY, HTTP:TIMEOUT, HTTP:BAD_REQUEST">
+                <set-variable
+                    doc:name="Set HTTP Status 502"
+                    variableName="httpStatus"
+                    value="502" />
+                <ee:transform doc:name="Build Error Response">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "error": {
+        "code": "DOWNSTREAM_ERROR",
+        "message": "Failed to fetch products from upstream service.",
+        "details": error.description default "Unknown error",
+        "timestamp": now() as String {format: "yyyy-MM-dd'T'HH:mm:ss'Z'"}
+    }
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <logger
+                    doc:name="Log HTTP Error"
+                    level="ERROR"
+                    message="#['[GET /dummy/products] HTTP Error: ' ++ error.description]" />
+            </on-error-propagate>
+
+            <on-error-propagate
+                doc:name="On Any Error"
+                type="ANY">
+                <set-variable
+                    doc:name="Set HTTP Status 500"
+                    variableName="httpStatus"
+                    value="500" />
+                <ee:transform doc:name="Build Generic Error Response">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "error": {
+        "code": "INTERNAL_SERVER_ERROR",
+        "message": "An unexpected error occurred.",
+        "details": error.description default "Unknown error",
+        "timestamp": now() as String {format: "yyyy-MM-dd'T'HH:mm:ss'Z'"}
+    }
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <logger
+                    doc:name="Log General Error"
+                    level="ERROR"
+                    message="#['[GET /dummy/products] Unexpected Error: ' ++ error.description]" />
+            </on-error-propagate>
+        </error-handler>
+
+    </flow>
+
+    <!-- =========================================================== -->
+    <!--  GET /dummy/products/{id} — Fetch product by ID             -->
+    <!-- =========================================================== -->
+    <flow name="get-product-by-id-flow" doc:name="Get Product By ID Flow">
+
+        <!-- 1. HTTP Listener -->
+        <http:listener
+            doc:name="GET /dummy/products/{id}"
+            config-ref="HTTP_Listener_Config"
+            path="/dummy/products/{id}"
+            allowedMethods="GET">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+
+        <!-- 2. Log incoming request -->
+        <logger
+            doc:name="Log Incoming Request"
+            level="INFO"
+            message="#['[GET /dummy/products/{id}] Fetching product ID: ' ++ attributes.uriParams.id]" />
+
+        <!-- 3. Call dummyjson.com/products/{id} -->
+        <http:request
+            doc:name="Fetch Product by ID from DummyJSON"
+            config-ref="DummyJSON_Request_Config"
+            method="GET"
+            path="#['/products/' ++ attributes.uriParams.id]">
+            <http:headers>
+                <![CDATA[#[output application/java
+                ---
+                {
+                    "Accept": "application/json"
+                }]]]>
+            </http:headers>
+        </http:request>
+
+        <!-- 4. Set success variables -->
+        <set-variable
+            doc:name="Set HTTP Status 200"
+            variableName="httpStatus"
+            value="200" />
+
+        <set-variable
+            doc:name="Set Outbound Headers"
+            variableName="outboundHeaders"
+            value="#[{'Content-Type': 'application/json', 'X-Powered-By': 'MuleSoft'}]" />
+
+        <!-- 5. Transform response -->
+        <ee:transform doc:name="Transform Response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <!-- 6. Log success -->
+        <logger
+            doc:name="Log Success"
+            level="INFO"
+            message="#['[GET /dummy/products/{id}] Successfully fetched product: ' ++ (payload.title default 'N/A')]" />
+
+        <!-- Error Handler -->
+        <error-handler>
+            <on-error-propagate
+                doc:name="On Not Found"
+                type="HTTP:NOT_FOUND">
+                <set-variable
+                    doc:name="Set HTTP Status 404"
+                    variableName="httpStatus"
+                    value="404" />
+                <ee:transform doc:name="Build 404 Response">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "error": {
+        "code": "PRODUCT_NOT_FOUND",
+        "message": "Product with the given ID was not found.",
+        "timestamp": now() as String {format: "yyyy-MM-dd'T'HH:mm:ss'Z'"}
+    }
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+
+            <on-error-propagate
+                doc:name="On Any Error"
+                type="ANY">
+                <set-variable
+                    doc:name="Set HTTP Status 500"
+                    variableName="httpStatus"
+                    value="500" />
+                <ee:transform doc:name="Build Error Response">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "error": {
+        "code": "INTERNAL_SERVER_ERROR",
+        "message": "An unexpected error occurred.",
+        "details": error.description default "Unknown error",
+        "timestamp": now() as String {format: "yyyy-MM-dd'T'HH:mm:ss'Z'"}
+    }
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <logger
+                    doc:name="Log Error"
+                    level="ERROR"
+                    message="#['[GET /dummy/products/{id}] Error: ' ++ error.description]" />
+            </on-error-propagate>
+        </error-handler>
+
+    </flow>
+
+</mule>
