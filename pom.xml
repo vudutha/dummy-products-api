@@ -125,6 +125,31 @@
             <url>https://repository.mulesoft.org/snapshots/</url>
             <layout>default</layout>
         </repository>
+        <!-- MuleSoft EE private repos — required for mule-service-http and EE runtime artifacts -->
+        <repository>
+            <id>mule-ee-releases</id>
+            <name>MuleSoft EE Releases</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/ci-releases/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>mule-ee-snapshots</id>
+            <name>MuleSoft EE Snapshots</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/ci-snapshots/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>libs-releases</id>
+            <name>MuleSoft Libs Releases</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/libs-releases/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>mule</id>
+            <name>MuleSoft Public</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/public/</url>
+            <layout>default</layout>
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -138,6 +163,18 @@
             <id>anypoint-exchange-v3</id>
             <name>Anypoint Exchange V3</name>
             <url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+            <layout>default</layout>
+        </pluginRepository>
+        <pluginRepository>
+            <id>mule-ee-releases</id>
+            <name>MuleSoft EE Releases</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/ci-releases/</url>
+            <layout>default</layout>
+        </pluginRepository>
+        <pluginRepository>
+            <id>mule</id>
+            <name>MuleSoft Public</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/public/</url>
             <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>

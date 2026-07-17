@@ -31,10 +31,15 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      # ── 4. Write ~/.m2/settings.xml with Connected App credentials ───────
-      #       GitHub Secrets required:
-      #         ANYPOINT_CLIENT_ID     — Connected App client_id
-      #         ANYPOINT_CLIENT_SECRET — Connected App client_secret
+      # ── 4. Write ~/.m2/settings.xml ──────────────────────────────────────
+      #   Credentials for:
+      #     • Anypoint Exchange v3  — Connected App (artifact downloads)
+      #     • mulesoft-releases     — Connected App
+      #     • mulesoft-snapshots    — Connected App
+      #     • mule-ee-releases      — Connected App (mule-service-http / EE XSD)
+      #     • mule-ee-snapshots     — Connected App
+      #     • libs-releases         — Connected App
+      #     • mule (public)         — Connected App
       - name: Configure Maven settings.xml
         uses: whelk-io/maven-settings-xml-action@v22
         with:
@@ -52,6 +57,26 @@ jobs:
               },
               {
                 "id": "mulesoft-snapshots",
+                "username": "~~~Client~~~",
+                "password": "${{ secrets.ANYPOINT_CLIENT_ID }}~?~${{ secrets.ANYPOINT_CLIENT_SECRET }}"
+              },
+              {
+                "id": "mule-ee-releases",
+                "username": "~~~Client~~~",
+                "password": "${{ secrets.ANYPOINT_CLIENT_ID }}~?~${{ secrets.ANYPOINT_CLIENT_SECRET }}"
+              },
+              {
+                "id": "mule-ee-snapshots",
+                "username": "~~~Client~~~",
+                "password": "${{ secrets.ANYPOINT_CLIENT_ID }}~?~${{ secrets.ANYPOINT_CLIENT_SECRET }}"
+              },
+              {
+                "id": "libs-releases",
+                "username": "~~~Client~~~",
+                "password": "${{ secrets.ANYPOINT_CLIENT_ID }}~?~${{ secrets.ANYPOINT_CLIENT_SECRET }}"
+              },
+              {
+                "id": "mule",
                 "username": "~~~Client~~~",
                 "password": "${{ secrets.ANYPOINT_CLIENT_ID }}~?~${{ secrets.ANYPOINT_CLIENT_SECRET }}"
               }
